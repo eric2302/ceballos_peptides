@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 from abagen.samples_ import update_mni_coords
 from glob import glob
 from utils import scaled_robust_sigmoid
+from sklearn.decomposition import PCA
+from plot_utils import divergent_green_yellow_orange
+from mpl_toolkits.mplot3d import Axes3D
+
+savefig = False
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #                              LOAD DATA
@@ -43,13 +48,12 @@ microarray_annots = pd.concat([update_mni_coords(annot)
                               for annot in microarray_annots], 
                               axis=0).reset_index(drop=True)
 
-# microarray_annots = pd.concat(microarray_annots, axis=0).reset_index(drop=True)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #                     LOOK FOR HYPOTHALAMIC NUCLEI
 ####################################################################################
 
-# look for the following structures in structure_name:
+# look for the following structures in structure_name
 structures = ['ventromedial hypothalamic nucleus',
               'perifornical nucleus',
               'posterior hypothalamic area',
@@ -60,8 +64,8 @@ structures = ['ventromedial hypothalamic nucleus',
               'tuberomammillary nucleus']
 
 # in microarray_annots, find the rows where structure_name is in structures
-# use str.contains to find the rows
 mask = microarray_annots['structure_name'].str.contains('|'.join(structures), case=False, na=False)
+
 # filter the microarray_annots dataframe using the mask
 microarray_annots_filtered = microarray_annots[mask].reset_index(drop=True)
 
@@ -122,19 +126,17 @@ receptor_coords['acronym'] = acronyms
 receptor_expr = receptor_expr[receptor_coords['mni_x'] < 0]
 receptor_coords = receptor_coords[receptor_coords['mni_x'] < 0]
 
-# so PCA on the receptor expression values
-from sklearn.decomposition import PCA
-pca = PCA(n_components=3)
+# PCA on the receptor expression values
+pca = PCA(n_components=8)
 pca.fit(receptor_expr)
 # use loadings_ to get the coordinates in the PCA space
-pca_coords = pca.transform(receptor_expr)
+pca_coords = pca.transform(receptor_expr)[:,:3] # x, y, z
 pca_coords = pd.DataFrame(pca_coords, index=receptor_expr.index, columns=['pca_x', 'pca_y', 'pca_z'])
 
-# %%
-from plot_utils import divergent_green_yellow_orange
-from mpl_toolkits.mplot3d import Axes3D
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#                                PLOT NUCLEI
+#####################################################################################
 
-# x, y, z = receptor_coords[['mni_x', 'mni_y', 'mni_z']].values.T
 x, y, z = pca_coords[['pca_x', 'pca_y', 'pca_z']].values.T
 acronyms = receptor_coords['acronym'].values
 
@@ -192,7 +194,12 @@ axs.flatten()[-4].remove()
 sns.despine(fig=fig, top=True, right=True, left=False, bottom=False)
 plt.subplots_adjust(wspace=-0.1, hspace=-0.2)
 
-plt.savefig('figs/hth_nuclei_receptor_expression.pdf')
+if savefig:
+    plt.savefig('figs/hth_nuclei_receptor_expression.pdf')
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#                                PLOT HEATMAP
+#####################################################################################
 
 # order receptor expression
 # first sort receptors by order from figure 2 
@@ -212,4 +219,5 @@ ax.set_xticks([])
 ax.set_xlabel('')
 ax.set_ylabel('')
 
-plt.savefig('figs/hth_nuclei_receptor_expression_heatmap.pdf');
+if savefig:
+    plt.savefig('figs/hth_nuclei_receptor_expression_heatmap.pdf')
