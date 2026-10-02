@@ -1,0 +1,34 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Organization of neuropeptide systems
+message: >-
+  If you use this dataset, please cite it using the metadata
+  from this file.
+type: dataset
+authors:
+  - given-names: Eric G
+    family-names: Ceballos
+  - given-names: Asa
+    family-names: Farahani
+  - given-names: Zhen-Qi
+    family-names: Liu
+  - given-names: Filip
+    family-names: Milisav
+  - given-names: Justine Y
+    family-names: Hansen
+  - given-names: Alain
+    family-names: Dagher
+  - given-names: Bratislav
+    family-names: Misic
+identifiers:
+  - type: doi
+    value: 10.17605/OSF.IO/4RSZ9
+    description: Data repository
+  - type: doi
+    value: 10.1038/s41593-026-02236-w
+    description: Paper
+repository-code: >-
+  https://github.com/netneurolab/ceballos_neuropeptide-organization
+license: BSD-3-Clause
